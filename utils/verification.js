@@ -38,4 +38,48 @@ const validate_sound = (sound) => {
     const soundRegex = /^[\w,\s-]+\.(mp3|wav)$/i;  // Case-insensitive match
     return soundRegex.test(sound);
 };
-export { validateEmail, validatePassword,isBoolean,isDate,isString,filter,validateLimitOffset,validateImage,validate_sound };
+const validateRangedFieldsUndefined = (fields) => {
+    console.log(fields);
+    return fields.some(field => field === null);
+}
+const validateHealerFieldsUndefined = (fields) => {
+    return fields.some(field => field === null);
+}
+const validateBarrierFieldsUndefined = (fields) => {
+    return fields.some(field => field === null);
+}
+const validateCloakFieldsUndefined = (fields) => {
+    return fields.some(field => field === null);
+}
+const validateCloakMechanismValid = (current_timer_based, current_proximity_based, new_timer_based, new_proximity_based) => {
+    if (new_timer_based === false && new_proximity_based === false) {
+        return false;
+    }
+    if (current_timer_based && new_timer_based === false && new_proximity_based !== true && current_proximity_based !== true) {
+        return false;
+    }
+    if (current_proximity_based && new_proximity_based === false && new_timer_based !== true && current_timer_based !== true) {
+        return false;
+    }
+    if (current_timer_based === true || current_proximity_based === true || new_timer_based === true || new_proximity_based === true) {
+        return true;
+    }
+    if (!current_timer_based && !current_proximity_based && !new_timer_based && !new_proximity_based) {
+        return true;
+    }
+    
+}
+const validateSpawnerFieldsUndefined = (fields) => {
+    return fields.some(field => field === null);
+}
+
+
+
+
+
+
+
+export { validateEmail, validatePassword,isBoolean,isDate,isString,filter,validateLimitOffset,
+    validateImage,validate_sound,validateRangedFieldsUndefined,validateHealerFieldsUndefined,
+    validateBarrierFieldsUndefined,validateCloakFieldsUndefined,validateSpawnerFieldsUndefined,
+    validateCloakMechanismValid };
