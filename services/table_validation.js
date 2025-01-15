@@ -38,7 +38,7 @@ const userValidation = (email,password,is_admin,blacklisted,is_update) => {
 const profileValidation = (user_id,username,birthday,pfp,about_me,is_update) => {
     if (!is_update){
         if (!user_id || !username || !birthday || !pfp || !about_me) {
-            return [false,'user_id, username, and birthday are required'];
+            return [false,'user_id, username,birthday,pfp and about me are required'];
         }
     }
     if (!is_update || user_id) {

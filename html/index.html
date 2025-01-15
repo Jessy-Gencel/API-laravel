@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .endpoint {
+            margin-bottom: 20px;
+        }
+        .code {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .response {
+            background-color: #e6e6e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .category-select {
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .no-indent {
+            margin-left: 0;
+            padding-left: 0;
+        }
+        .request-body, .query-params, .url-params {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        } 
+        .example-request-field {
+            display: inline;
+        }
+        .example-request{
+            color: darkorchid;
+            display: inline;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>API Documentation</h1>
+
+    <!-- Category Selection -->
+    <div class="category-select">
+        <label for="category">Choose a category:</label>
+        <select id="category" onchange="filterEndpoints()">
+            <option value="all">All</option>
+            <option value="users">Users</option>
+            <option value="profiles">Profiles</option>
+            <option value="enemies">Enemies</option>
+        </select>
+    </div>
+
+    <!-- List of Endpoints -->
+    
+    <!-- User Endpoints -->
+    <div class="endpoint category-users no-indent">
+        <h1>USERS</h1>
+    
+        <h2>1. Get All Users</h2>
+        <p><strong>GET</strong> /users</p>
+        <p><strong>Description:</strong> Retrieves a list of all users in the system, with optional query parameters for pagination.</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><strong>limit</strong> (optional): The number of users to return. Default is 10.</li>
+            <li><strong>offset</strong> (optional): The number of users to skip. Default is 0.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users?limit=3&offset=1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 1,
+                        "email": "user@example.com",
+                        "is_admin": false,
+                        "blacklisted": false,
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "updated_at": "2025-01-15T12:00:00Z"
+                    },
+                    ...
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>2. Get User by ID</h2>
+        <p><strong>GET</strong> /users/:id</p>
+        <p><strong>Description:</strong> Retrieves a specific user by their ID.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user you want to retrieve.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "id": 1,
+                    "email": "user@example.com",
+                    "is_admin": false,
+                    "blacklisted": false,
+                    "created_at": "2025-01-15T12:00:00Z",
+                    "updated_at": "2025-01-15T12:00:00Z"
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>3. Create a New User</h2>
+        <p><strong>POST</strong> /users</p>
+        <p><strong>Description:</strong> Creates a new user in the system with the provided data.</p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users</span>
+        </p>
+        <p><strong>Request Body:</strong></p>
+        <pre class="request-body">
+            {
+                "email": "user@example.com",
+                "password": "userPassword123",
+                "is_admin": false,
+                "blacklisted": false
+            }
+        </pre>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>{ "message": "User created", user: (The resulting user object)  }</pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>4. Update User by ID</h2>
+        <p><strong>PUT</strong> /users/:id</p>
+        <p><strong>Description:</strong> Updates the details of a specific user by their ID.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user you want to update.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users</span>
+        </p>
+        <p><strong>Request Body:</strong></p>
+        <pre>
+            {
+                "email": "new-email@example.com",
+                "password": "newPassword123",
+                "is_admin": true,
+                "blacklisted": false
+            }
+        </pre>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>{ "message": "User updated", user: (The resulting user object) }</pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>5. Delete User by ID</h2>
+        <p><strong>DELETE</strong> /users/:id</p>
+        <p><strong>Description:</strong> Deletes a user from the system by their ID.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user you want to delete.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>{ "message": "User deleted with id 1" }</pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>6. Get Only Admin Users</h2>
+        <p><strong>GET</strong> /users/filter/admins</p>
+        <p><strong>Description:</strong> Retrieves a list of all users who are admins.</p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/filter/admins</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 1,
+                        "email": "admin@example.com",
+                        "is_admin": true,
+                        "blacklisted": false,
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "updated_at": "2025-01-15T12:00:00Z"
+                    }
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>7. Get Only Blacklisted Users</h2>
+        <p><strong>GET</strong> /users/filter/blacklisted</p>
+        <p><strong>Description:</strong> Retrieves a list of all users who are blacklisted.</p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/filter/blacklisted</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 2,
+                        "email": "blacklisted@example.com",
+                        "is_admin": false,
+                        "blacklisted": true,
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "updated_at": "2025-01-15T12:00:00Z"
+                    }
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>8. Get User and Profile Details</h2>
+        <p><strong>GET</strong> /users/userAndProfile/:id</p>
+        <p><strong>Description:</strong> Retrieves both the user and their profile information by user ID.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user whose profile you want to retrieve.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/userAndProfile/1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "user": {
+                        "id": 1,
+                        "email": "user@example.com",
+                        "is_admin": false,
+                        "blacklisted": false,
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "updated_at": "2025-01-15T12:00:00Z"
+                    },
+                    "profile": {
+                        "id": 1,
+                        "username": "user123",
+                        "birthday": "1990-01-01",
+                        "pfp": "image-url.jpg",
+                        "about_me": "Hello, I'm a user!",
+                        "created_at": "2025-01-15T12:00:00Z",
+                        "updated_at": "2025-01-15T12:00:00Z"
+                    }
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>9. Get Combined Query for User Details</h2>
+        <p><strong>GET</strong> /users/combinedQuery/userDetails</p>
+        <p><strong>Description:</strong> Retrieves a combination of user details, including their profile, highscore, and other related data, with optional filtering and pagination.</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><strong>name</strong> (optional): The username or part of the username to filter by.</li>
+            <li><strong>limit</strong> (optional): The number of records to return (default: 10).</li>
+            <li><strong>offset</strong> (optional): The offset for pagination (default: 0).</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/combinedQuery/userDetails?name=user&limit=2</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "data": [
+                        {
+                            "user": {
+                                "id": 1,
+                                "email": "user@example.com"
+                            },
+                            "profile": {
+                                "username": "user123",
+                                "about_me": "Hello, I'm a user!",
+                                "pfp": "image-url.jpg"
+                            },
+                            "leaderboard": {
+                                "highscore": 1500
+                            },
+                            "comments": [
+                                {
+                                    "content": "Can't wait for the next update!",
+                                    "created_at": "2025-01-11T11:40:46.000Z"
+                                },
+                                {
+                                    "content": "I am really excited to play this game :&#41 !!!",
+                                    "created_at": "2024-10-31T14:33:06.000Z"
+                                }
+                            ],
+                            "faqs": [
+                                {
+                                    "question": "How much content is there in Alien Defense?",
+                                    "answer": "Alien Defense in it's 1.0 release features 10 levels, 5 different towers and a whopping 13 different enemies 
+                                    forcing you to quickly adapt to their different strengths and weaknesses. Expect even more once the final release is here!!!"
+                                },
+                                {
+                                    "question": "How did this project come to be?",
+                                    "answer": "The project started out as an assignment for one of my classes. I intend to continue working on it with an eventual Steam release in the future."
+                                }
+                            ],
+                            "news": [
+                                {
+                                    "title": "Release of Alien Defense 1.0",
+                                    "content": "The first release of Alien Defense is here. We hope you enjoy! :)"
+                                }
+                            ],
+                            "profile_comments": [
+                                "content": "This guy is really good at the game!",
+                            ],
+                            "achievements": [
+                                ["beginner", "explorer", "Juggernaut Slayer"]
+                            ]
+                        }
+                    ]
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-users">
+        <h2>10. Get Users Based on Highscore</h2>
+        <p><strong>GET</strong> /users/filter/userAndProfilesBasedOnHighscore</p>
+        <p><strong>Description:</strong> Retrieves users along with profile details based on their highscore, orders the results from highest to lowest achieved score.</p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/users/filter/userAndProfilesBasedOnHighscore</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "userId": 1,
+                        "email": "user@example.com",
+                        "profileName": "user123",
+                        "birthday": "1990-01-01",
+                        "about_me": "Hello, I'm a user!",
+                        "highscore": 1000
+                    }
+                ]
+            </pre>
+        </div>
+    </div>
+    
+
+
+    <!-- Profile Endpoints -->
+    <div class="endpoint category-profiles">
+        <h1>PROFILES</h1>
+        <h2>1. Create Profile</h2>
+        <p><strong>POST</strong> /profiles/</p>
+        <p><strong>Description:</strong> This endpoint allows a user to create a new profile. You need to provide the user's information like username, birthday, profile picture, and a short bio.</p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/profiles/</span>
+        </p>
+        <p><strong>Request Body:</strong></p>
+        <div class="request-body">
+            <pre>
+                {
+                    "user_id": 1,
+                    "username": "example_username",
+                    "birthday": "2000-09-25",
+                    "pfp": "image-url.jpg",
+                    "about_me": "this is my about me"
+                }
+            </pre>
+        </div>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Profile created"
+                    "profile": (The resulting user profile object)
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-profiles">
+        <h2>2. Update Profile</h2>
+        <p><strong>PUT</strong> /profiles/:id</p>
+        <p><strong>Description:</strong> This endpoint allows you to update an existing profile based on the profile ID. You can modify fields such as username, birthday, profile picture, and the about me section.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user whose profile you want to retrieve.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/profiles/1</span>
+        </p>
+        <p><strong>Request Body:</strong></p>
+        <div class="request-body">
+            <pre>
+                {
+                    "username": "user321 (optional)",
+                    "birthday": "2000-09-25 (optional)",
+                    "pfp": "image.png (optional)", ,
+                    "about_me": "this is an about me (optional)"
+                }
+            </pre>
+        </div>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Profile updated"
+                    "profile": (The resulting user profile object)
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-profiles">
+        <h2>3. Get All Profiles</h2>
+        <p><strong>GET</strong> /profiles/</p>
+        <p><strong>Description:</strong> This endpoint retrieves a list of all profiles. You can use query parameters to limit, offset, or filter profiles by name.</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><strong>name</strong> (optional): The username or part of the username to filter by.</li>
+            <li><strong>limit</strong> (optional): The number of records to return (default: 10).</li>
+            <li><strong>offset</strong> (optional): The offset for pagination (default: 0).</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/profiles/?name=user&limit=2</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 1,
+                        "user_id": 1,
+                        "username": "user123",
+                        "birthday": "2000-09-25",
+                        "pfp": "image-url.jpg",
+                        "about_me": "this is the about me",
+                        "created_at": "2025-01-11T11:40:46.000Z",
+                        "updated_at": "2025-01-11T11:40:46.000Z"
+                    }
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-profiles">
+        <h2>4. Get Profile by ID</h2>
+        <p><strong>GET</strong> /profiles/:id</p>
+        <p><strong>Description:</strong> This endpoint retrieves a single profile by its ID. The ID is provided in the URL parameters to identify the profile to fetch.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user whose profile you want to retrieve.</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/profiles/1</span>
+        </p>      
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "id": 1,
+                    "user_id": 1,
+                    "username": "user123",
+                    "birthday": "2000-09-25",
+                    "pfp": "image-url.jpg",
+                    "about_me": "This is the about me",
+                    "created_at": "2025-01-11T11:40:46.000Z",
+                    "updated_at": "2025-01-11T11:40:46.000Z"
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-profiles">
+        <h2>5. Delete Profile</h2>
+        <p><strong>DELETE</strong> /profiles/:id</p>
+        <p><strong>Description:</strong> This endpoint allows you to delete a profile by its ID. Once deleted, the profile will be permanently removed from the system.</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the user whose profile you want to retrieve.</li>
+        </ul> 
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/profiles/1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Profile deleted with id: 1"
+                }
+            </pre>
+        </div>
+    </div>
+    
+    
+
+    <!-- Enemy Endpoints -->
+    <div class="endpoint category-enemies">
+        <h1>Enemies</h1>
+        <h2>1. Get All Enemies</h2>
+        <p><strong>GET</strong> /enemies</p>
+        <p><strong>Description:</strong> This endpoint allows you to retrieve all enemies from the DB. You can also filter on certain criteria</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><strong>name</strong> (optional): The name of the enemy to search for or a portion of the name</li>
+            <li><strong>limit</strong> (optional): The number of records to return (default: 10).</li>
+            <li><strong>offset</strong> (optional): The offset for pagination (default: 0).</li>
+        </ul>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies/?limit=10&offset=1</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 2,
+                        "type": "ranged",
+                        "name": "Archer",
+                        "health": 100,
+                        "speed": 2,
+                        "damage": 15,
+                        "score": 10,
+                        "attack_speed": 1.5,
+                        "sprite": "archer_sprite.png",
+                        "sound": "archer_attack.mp3",
+                        "projectile_sprite": "arrow_sprite.png",
+                        "projectile_sound": "arrow_sound.mp3",
+                        "projectile_speed": 5,
+                        "range": 200,
+                        "fire_rate": 1.2,
+                        "heal_amount": null,
+                        "heal_rate": null,
+                        "heal_range": null,
+                        "barrier_health": null,
+                        "barrier_cooldown": null,
+                        "barrier_regen": null,
+                        "barrier_regen_cooldown": null,
+                        "barrier_radius": null,
+                        "spawn_rate": null,
+                        "cloak_duration": null,
+                        "cloak_radius": null,
+                        "cloak_cooldown": null,
+                        "timer_based": null,
+                        "proximity_based": null
+                    },
+                    {
+                        "id": 3,
+                        "type": "healer",
+                        "name": "Healer",
+                        "health": 80,
+                        "speed": 1.5,
+                        "damage": 5,
+                        "score": 8,
+                        "attack_speed": 2.0,
+                        "sprite": "healer_sprite.png",
+                        "sound": "healer_heal.mp3",
+                        "projectile_sprite": null,
+                        "projectile_sound": null,
+                        "projectile_speed": null,
+                        "range": null,
+                        "fire_rate": null,
+                        "heal_amount": 30,
+                        "heal_rate": 1.0,
+                        "heal_range": 150,
+                        "barrier_health": null,
+                        "barrier_cooldown": null,
+                        "barrier_regen": null,
+                        "barrier_regen_cooldown": null,
+                        "barrier_radius": null,
+                        "spawn_rate": null,
+                        "cloak_duration": null,
+                        "cloak_radius": null,
+                        "cloak_cooldown": null,
+                        "timer_based": null,
+                        "proximity_based": null
+                    },
+                    ...
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-enemies">
+        <h2>2. Get Enemy By ID</h2>
+        <p><strong>GET</strong> /enemies/:id</p>
+        <p><strong>Description:</strong> This endpoint allows you to retrieve a specific enemy on the basis of ID from the DB</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the enemy you want to retrieve.</li>
+        </ul> 
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies/2</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "id": 2,
+                    "type": "ranged",
+                    "name": "Archer",
+                    "health": 100,
+                    "speed": 2,
+                    "damage": 15,
+                    "score": 10,
+                    "attack_speed": 1.5,
+                    "sprite": "archer_sprite.png",
+                    "sound": "archer_attack.mp3",
+                    "projectile_sprite": "arrow_sprite.png",
+                    "projectile_sound": "arrow_sound.mp3",
+                    "projectile_speed": 5,
+                    "range": 200,
+                    "fire_rate": 1.2,
+                    "heal_amount": null,
+                    "heal_rate": null,
+                    "heal_range": null,
+                    "barrier_health": null,
+                    "barrier_cooldown": null,
+                    "barrier_regen": null,
+                    "barrier_regen_cooldown": null,
+                    "barrier_radius": null,
+                    "spawn_rate": null,
+                    "cloak_duration": null,
+                    "cloak_radius": null,
+                    "cloak_cooldown": null,
+                    "timer_based": null,
+                    "proximity_based": null
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-enemies">
+        <h2>3. Get Enemies by Category</h2>
+        <p><strong>GET</strong> /enemies/category/:enemyCategory</p>
+        <p><strong>Description:</strong> Allows you to fetch all enemies which possess abilities belonging to the following classes: ranged,healer,barrier,cloaked,spawner</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>enemyCategory</strong>: The category to be fetched. Valid categories are ranged,healer,barrier,cloaked,spawner</li>
+        </ul> 
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies/category/barrier</span>
+        </p>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                [
+                    {
+                        "id": 6,
+                        "type": "barrier",
+                        "name": "barrier_conjurer",
+                        "health": 40,
+                        "speed": 0.8,
+                        "damage": 10,
+                        "score": 500,
+                        "attack_speed": 1,
+                        "sprite": "barrier_conjurer.png",
+                        "sound": null,
+                        "projectile_sprite": null,
+                        "projectile_sound": null,
+                        "projectile_speed": null,
+                        "range": null,
+                        "fire_rate": null,
+                        "heal_amount": null,
+                        "heal_rate": null,
+                        "heal_range": null,
+                        "barrier_health": 100,
+                        "barrier_cooldown": 4,
+                        "barrier_regen": 10,
+                        "barrier_regen_cooldown": 1,
+                        "barrier_radius": 80,
+                        "spawn_rate": null,
+                        "cloak_duration": null,
+                        "cloak_radius": null,
+                        "cloak_cooldown": null,
+                        "timer_based": null,
+                        "proximity_based": null,
+                        "created_at": "2024-11-11T13:40:10.000Z",
+                        "updated_at": "2024-11-11T13:40:10.000Z"
+                    },
+                    {
+                        "id": 9,
+                        "type": "inquisitor",
+                        "name": "inquisitor",
+                        "health": 80,
+                        "speed": 0.8,
+                        "damage": 20,
+                        "score": 1500,
+                        "attack_speed": 1.5,
+                        "sprite": "inquisitor.png",
+                        "sound": null,
+                        "projectile_sprite": null,
+                        "projectile_sound": null,
+                        "projectile_speed": null,
+                        "range": null,
+                        "fire_rate": null,
+                        "heal_amount": null,
+                        "heal_rate": null,
+                        "heal_range": null,
+                        "barrier_health": 120,
+                        "barrier_cooldown": 2,
+                        "barrier_regen": 20,
+                        "barrier_regen_cooldown": 1,
+                        "barrier_radius": 80,
+                        "spawn_rate": null,
+                        "cloak_duration": null,
+                        "cloak_radius": null,
+                        "cloak_cooldown": null,
+                        "timer_based": null,
+                        "proximity_based": null,
+                        "created_at": "2024-11-11T13:40:10.000Z",
+                        "updated_at": "2024-11-11T13:40:10.000Z"
+                    },
+                    {
+                        "id": 13,
+                        "type": "juggernaut",
+                        "name": "juggernaut",
+                        "health": 1000,
+                        "speed": 0.1,
+                        "damage": 50,
+                        "score": 10000,
+                        "attack_speed": 0.3,
+                        "sprite": "juggernaut.png",
+                        "sound": null,
+                        "projectile_sprite": null,
+                        "projectile_sound": null,
+                        "projectile_speed": null,
+                        "range": null,
+                        "fire_rate": null,
+                        "heal_amount": null,
+                        "heal_rate": null,
+                        "heal_range": null,
+                        "barrier_health": 500,
+                        "barrier_cooldown": 7,
+                        "barrier_regen": 100,
+                        "barrier_regen_cooldown": 3,
+                        "barrier_radius": 300,
+                        "spawn_rate": null,
+                        "cloak_duration": 5,
+                        "cloak_radius": null,
+                        "cloak_cooldown": 15,
+                        "timer_based": 1,
+                        "proximity_based": null,
+                        "created_at": "2024-11-11T13:40:10.000Z",
+                        "updated_at": "2024-11-11T13:40:10.000Z"
+                    },
+                    ...
+                ]
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-enemies">
+        <h2>4. Delete Enemy</h2>
+        <p><strong>DELETE</strong> /enemies/:id</p>
+        <p><strong>Description:</strong> Deletes the enemy specified with the id</p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the enemy you want to delete.</li>
+        </ul> 
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies/1</span>
+        </p>
+
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Enemy deleted with id 1"
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-enemies">
+        <h2>5. Create Enemy</h2>
+        <p><strong>POST</strong> /enemies</p>
+        <p><strong>Description:</strong> Creates an enemy with the defined values. It is important that all required fields for enemy classes are filled in.
+            If for example any of the ranged fields are filled in, then all other fields related to the ranged class must be filled in. If none of a classes field are filled in
+            Then this may remain null
+        </p>
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies</span>
+        </p>
+        <p><strong>Request Body:</strong></p>
+        <div class="request-body">
+            <pre>
+                {
+                    "type": "ranged",
+                    "name": "Archer",
+                    "health": 100,
+                    "speed": 2,
+                    "damage": 15,
+                    "score": 10,
+                    "attack_speed": 1.5,
+                    "sprite": "archer_sprite.png",
+                    "sound": "archer_attack.mp3",
+                    "projectile_sprite": "arrow_sprite.png",
+                    "projectile_sound": "arrow_sound.mp3",
+                    "projectile_speed": 5,
+                    "range": 200,
+                    "fire_rate": 1.2,
+                }   
+            </pre>
+        </div>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Enemy created successfully"
+                    "enemy": (The resulting enemy object)
+                }
+            </pre>
+        </div>
+    </div>
+    
+    <div class="endpoint category-enemies">
+        <h2>6. Update Enemy</h2>
+        <p><strong>PUT</strong> /enemies/:id</p>
+        <p><strong>Description:</strong> Updates an enemy with the defined values. It is important that all required fields for enemy classes are filled in.
+            If your request alters an enemy and assigns a class by updating a field that is specific to an enemy class without updating the other related fields the request will be denied. 
+            If an enemy already has a class you may update individual values for that enemy class without updating the other related class fields. <br>
+            FOR EXAMPLE : altering range on the archer enemy is completely fine, but altering the heal_amount on the archer enemy will be denied if the heal_rate and heal_range are not updated as well.
+        </p>
+        <p><strong>Path Parameters:</strong></p>
+        <ul>
+            <li><strong>id</strong>: The ID of the enemy you want to update.</li>
+        </ul> 
+        <p class="example-request-field">
+            <strong>Example Request:</strong>
+            <span class="example-request">http://localhost:3000/enemies/2</span>
+        </p>
+        <p><strong>Request Body:</strong> (intends to change the archer into a ranged healer)</p>
+        <div class="request-body">
+            <pre>
+                {
+                    "heal_amount": 50,
+                    "heal_rate": 2,
+                    "heal_range": 400,
+                }
+            </pre>
+        </div>
+        <p><strong>Response:</strong></p>
+        <div class="response">
+            <pre>
+                {
+                    "message": "Enemy updated successfully"
+                    "enemy": (The resulting enemy object)
+                }
+            </pre>
+        </div>
+    </div>
+    
+
+    <script>
+        // Function to filter endpoints based on selected category
+        function filterEndpoints() {
+            const category = document.getElementById("category").value;
+            
+            // Get all categories
+            const categories = ["users", "profiles", "enemies"];
+            
+            categories.forEach(cat => {
+                const endpoints = document.querySelectorAll(`.category-${cat}`);
+                endpoints.forEach(endpoint => {
+                    if (category === "all" || category === cat) {
+                        endpoint.classList.remove("hidden");
+                    } else {
+                        endpoint.classList.add("hidden");
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

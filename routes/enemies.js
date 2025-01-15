@@ -6,8 +6,24 @@ import { validateCloakMechanismValid} from '../utils/verification.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
+    const { limit = 10, offset = 0, name } = req.query;
+
     try {
-        const [enemies] = await connection.query('SELECT * FROM enemies');
+        // Build the query
+        let query = 'SELECT * FROM enemies';
+        let queryParams = [];
+
+        if (name) {
+            query += ' WHERE name = ?';
+            queryParams.push(name);
+        }
+
+        // Add pagination if limit and offset are specified
+        query += ' LIMIT ? OFFSET ?';
+        queryParams.push(Number(limit), Number(offset));
+
+        const [enemies] = await connection.query(query, queryParams);
+
         res.json(enemies);
     } catch (err) {
         console.error(err);
@@ -105,7 +121,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Enemy not found' });
         }
         
-        res.json({ message: 'Enemy deleted' });
+        res.json({ message: 'Enemy deleted with ID: ' + id });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error deleting enemy' });
@@ -143,13 +159,14 @@ router.post('/', async (req, res) => {
         proximity_based,
     } = req.body;
 
-    //VALIDATION
+    // VALIDATION
     const coreValidation = enemyCoreValidation(name, health, speed, damage, score, attack_speed, sprite,false);
     const rangedValidation = rangedEnemyValidation(projectile_sprite, projectile_sound, projectile_speed, range, fire_rate,false);
     const healerValidation = healerEnemyValidation(heal_amount, heal_rate, heal_range,false);
     const barrierValidation = barrierEnemyValidation(barrier_health, barrier_cooldown, barrier_regen, barrier_regen_cooldown, barrier_radius,false);
     const cloakValidation = cloakEnemyValidation(cloak_duration, cloak_radius, cloak_cooldown,timer_based, proximity_based,false);
     const spawnerValidation = spawnerEnemyValidation(spawn_rate,false);
+    
     if (coreValidation[0] === false) {
         return res.status(400).json({ message: coreValidation[1] });
     }
@@ -169,12 +186,12 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ message: spawnerValidation[1] });
     }
     
-
     try {
         const [existingEnemy] = await connection.query('SELECT name FROM enemies WHERE name = ?', [name]);
         if (existingEnemy.length) {
             return res.status(400).json({ message: 'An enemy with this name already exists' });
         }
+
         // Insert the enemy data into the database
         const query = `
             INSERT INTO enemies 
@@ -186,7 +203,7 @@ router.post('/', async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         `;
         
-        await connection.query(query, [
+        const [result] = await connection.query(query, [
             type, name, health, speed, damage, score, attack_speed, sprite, sound, 
             projectile_sprite, projectile_sound, projectile_speed, range, fire_rate, 
             heal_amount, heal_rate, heal_range, barrier_health, barrier_cooldown, 
@@ -194,13 +211,15 @@ router.post('/', async (req, res) => {
             cloak_radius, cloak_cooldown, timer_based, proximity_based
         ]);
 
-        res.status(201).json({ message: 'Enemy created successfully' });
+        // Fetch the newly created enemy using the inserted ID
+        const [newEnemy] = await connection.query('SELECT * FROM enemies WHERE id = ?', [result.insertId]);
+
+        res.status(201).json({ message: 'Enemy created successfully', enemy: newEnemy[0] });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error creating enemy' });
     }
 });
-
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const {
@@ -235,15 +254,17 @@ router.put('/:id', async (req, res) => {
     } = req.body;
 
     const [[existingEnemy]] = await connection.query('SELECT * FROM enemies WHERE id = ?', [id]);
-    if (existingEnemy.length === 0) {
+    if (!existingEnemy) {
         return res.status(404).json({ message: 'Enemy not found' });
     }
+
     const individualFieldUpdatePermission = enemyUndefinedValidation(existingEnemy);
     console.log(individualFieldUpdatePermission);
-    //VALIDATION
+
     if (validateCloakMechanismValid(existingEnemy["timer_based"], existingEnemy["proximity_based"], timer_based, proximity_based) === false) {
         return res.status(400).json({ message: 'Invalid cloak mechanism, the intended update would result in the cloaked enemy to not function due to both proximity and timer based cloaking being turned off' });
     }
+
     const coreValidation = enemyCoreValidation(name, health, speed, damage, score, attack_speed, sprite,true);
     const rangedValidation = rangedEnemyValidation(projectile_sprite, projectile_sound, projectile_speed, range, fire_rate,true,individualFieldUpdatePermission[0]);
     const healerValidation = healerEnemyValidation(heal_amount, heal_rate, heal_range,true,individualFieldUpdatePermission[1]);
@@ -270,7 +291,6 @@ router.put('/:id', async (req, res) => {
         return res.status(400).json({ message: spawnerValidation[1] });
     }
 
-    // Construct the update query
     try {
         const query = `
             UPDATE enemies
@@ -316,14 +336,16 @@ router.put('/:id', async (req, res) => {
         ];
 
         await connection.query(query, values);
-        res.status(200).json({ message: 'Enemy updated successfully' });
+
+        // Fetch the updated enemy details
+        const [updatedEnemy] = await connection.query('SELECT * FROM enemies WHERE id = ?', [id]);
+
+        res.status(200).json({ message: 'Enemy updated successfully', enemy: updatedEnemy[0] });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error updating enemy' });
     }
-
-
-})
+});
 
 
 
