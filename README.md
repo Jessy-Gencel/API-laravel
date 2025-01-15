@@ -13,7 +13,9 @@ To access the different routes please utilize a tool like Postman. The installat
 8. Click the aforementioned link that appears in the terminal to view the API documentation.
 9. Congratulations, you have successfully installed the API!
 # Sources
-API structure part 1: https://chatgpt.com/share/6787e1c0-b6bc-8009-84c8-2f5d5a541145
-API structure part 2: https://chatgpt.com/share/6787e205-4b84-8009-a0f4-e1cbb986e876
-Confirmation of Laravels Hashing algorithm: https://laravel.com/docs/11.x/hashing 
-Express usage: https://devdocs.io/express/
+<ul>
+  <li>API structure part 1: https://chatgpt.com/share/6787e1c0-b6bc-8009-84c8-2f5d5a541145</li>
+  <li>API structure part 2: https://chatgpt.com/share/6787e205-4b84-8009-a0f4-e1cbb986e876</li>
+  <li>Confirmation of Laravels Hashing algorithm: https://laravel.com/docs/11.x/hashing </li>
+  <li>Express usage: https://devdocs.io/express/</li>
+</ul>
