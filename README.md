@@ -1,5 +1,5 @@
 # Alien Defense API
-This API requires the Alien Defense project to be working on the users pc. In order to run this project please follow the guide on [Alien Defense's](#) Github page.  
+This API requires the Alien Defense project to be working on the users pc. In order to run this project please follow the guide on [Alien Defense's](https://github.com/Jessy-Gencel/LaravelProject) Github page.  
 To access the different routes please utilize a tool like Postman. The installation can be found [here](https://www.postman.com/downloads/).  
 # Installation
 1. Clone the project to a directory of your choosing.
