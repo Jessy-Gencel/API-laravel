@@ -14,22 +14,44 @@ router.get('/', async (req, res) => {
         let queryParams = [];
 
         if (name) {
-            query += ' WHERE name = ?';
-            queryParams.push(name);
+            query += ' WHERE name LIKE ?';
+            queryParams.push(`%${name}%`);  // Add wildcards for partial matching
         }
 
-        // Add pagination if limit and offset are specified
+        // Add pagination
         query += ' LIMIT ? OFFSET ?';
         queryParams.push(Number(limit), Number(offset));
 
+        // Add validation for limit and offset
+        if (isNaN(Number(limit)) || isNaN(Number(offset))) {
+            return res.status(400).json({ message: 'Invalid limit or offset value' });
+        }
+
+        // Log the query and parameters for debugging
+        console.log('Query:', query);
+        console.log('Parameters:', queryParams);
+
         const [enemies] = await connection.query(query, queryParams);
 
-        res.json(enemies);
+        // Return total count along with results
+        const [countResult] = await connection.query(
+            `SELECT COUNT(*) as total FROM enemies${name ? ' WHERE name LIKE ?' : ''}`,
+            name ? [`%${name}%`] : []
+        );
+
+        res.json({
+            enemies
+        });
+
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Error fetching enemies' });
+        console.error('Error fetching enemies:', err);
+        res.status(500).json({ 
+            message: 'Error fetching enemies',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 });
+
 
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
@@ -55,9 +77,8 @@ router.get('/category/:enemyCategory', async (req, res) => {
             query = `
                 SELECT * FROM enemies 
                 WHERE projectile_sprite IS NOT NULL
-                AND projectile_sound IS NOT NULL
                 AND projectile_speed IS NOT NULL
-                AND range IS NOT NULL
+                AND \`range\` IS NOT NULL
                 AND fire_rate IS NOT NULL
             `;
             break;
@@ -82,10 +103,11 @@ router.get('/category/:enemyCategory', async (req, res) => {
         case 'cloak':
             query = `
                 SELECT * FROM enemies 
-                WHERE cloak_duration IS NOT NULL
-                AND cloak_radius IS NOT NULL
-                AND cloak_cooldown IS NOT NULL
-                AND (timer_based IS NOT NULL OR proximity_based IS NOT NULL)
+                WHERE (
+                    (timer_based = true AND cloak_duration IS NOT NULL AND cloak_cooldown IS NOT NULL)
+                    OR 
+                    (proximity_based = true AND cloak_radius IS NOT NULL)
+                )
             `;
             break;
         case 'spawner':
@@ -99,17 +121,16 @@ router.get('/category/:enemyCategory', async (req, res) => {
     }
 
     try {
-        const [results] = await connection.query(query, params);
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'No enemies found for the specified type' });
-        }
-        return res.status(200).json(results);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'An error occurred while fetching enemies' });
+        const [enemies] = await connection.query(query, params);
+        res.json(enemies);
+    } catch (err) {
+        console.error('Error fetching enemies by category:', err);
+        res.status(500).json({ 
+            message: 'Error fetching enemies by category',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 });
-
 
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;

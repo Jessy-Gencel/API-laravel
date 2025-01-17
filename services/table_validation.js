@@ -35,15 +35,10 @@ const userValidation = (email,password,is_admin,blacklisted,is_update) => {
     return [true];
 }
 
-const profileValidation = (user_id,username,birthday,pfp,about_me,is_update) => {
+const profileValidation = (username,birthday,pfp,about_me,is_update) => {
     if (!is_update){
-        if (!user_id || !username || !birthday || !pfp || !about_me) {
-            return [false,'user_id, username,birthday,pfp and about me are required'];
-        }
-    }
-    if (!is_update || user_id) {
-        if (!Number.isInteger(user_id)) {
-            return [false,'user_id must be a valid integer'];
+        if (!username || !birthday || !pfp || !about_me) {
+            return [false,'username,birthday,pfp and about me are required'];
         }
     }
     if(!is_update || username){

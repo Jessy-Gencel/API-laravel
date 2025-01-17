@@ -45,11 +45,17 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-    const { id } = req.params;
+    let { id } = req.params;
     const { username, birthday, pfp, about_me } = req.body;
 
+    // Parse ID to integer
+    id = parseInt(id, 10);
+    if (isNaN(id)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
     // VALIDATION
-    const validationResult = profileValidation(id, username, birthday, pfp, about_me, true);
+    const validationResult = profileValidation(username, birthday, pfp, about_me, true);
     if (validationResult[0] === false) {
         return res.status(400).json({ message: validationResult[1] });
     }
@@ -70,8 +76,11 @@ router.put('/:id', async (req, res) => {
 
         res.json({ message: 'Profile updated', profile: updatedProfile[0] });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Error updating profile' });
+        console.error('Error updating profile:', err);
+        res.status(500).json({ 
+            message: 'Error updating profile',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 });
 

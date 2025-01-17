@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
     try {
         const [rows] = await connection.query(
             'SELECT * FROM users LIMIT ? OFFSET ?',
-            [validationResult[1], validationResult[2] ? null : offset]
+            [validationResult[1], validationResult[2] ? validationResult[2] : 0]
         );
         res.json(rows);
     } catch (err) {
@@ -195,130 +195,91 @@ router.get('/userAndProfile/:id', async (req, res) => {
 
 router.get('/combinedQuery/userDetails', async (req, res) => {
     const { name, limit = 10, offset = 0 } = req.query;
-
+    
     // Validate limit and offset
     const validationResult = validateLimitOffset(limit, offset);
     if (validationResult[0] === false) {
         return res.status(400).json({ message: validationResult[1] });
     }
 
-    try {        // Construct the SQL query with joins and optional name filtering
-        let query = `
+    try {
+        // First query: Get basic user data
+        const userQuery = `
             SELECT 
-                users.id AS user_id, users.email AS user_email,
-                profiles.username, profiles.about_me, profiles.pfp, 
-                leaderboards.highscore,
-                comments.content AS comment_content, comments.created_at AS comment_created_at,
-                faqs.question AS faq_question, faqs.answer AS faq_answer,
-                news.title AS news_title, news.content AS news_content,
-                profile_comments.content AS profile_comment_content,
-                achievements.name AS achievement_name
-            FROM users
-            LEFT JOIN profiles ON users.id = profiles.user_id
-            LEFT JOIN leaderboards ON users.id = leaderboards.user_id
-            LEFT JOIN comments ON users.id = comments.user_id
-            LEFT JOIN faqs ON users.id = faqs.user_id
-            LEFT JOIN news ON users.id = news.user_id
-            LEFT JOIN profile_comments ON users.id = profile_comments.user_id
-            LEFT JOIN achievement_user ON users.id = achievement_user.user_id
-            LEFT JOIN achievements ON achievement_user.achievement_id = achievements.id
+                u.id, u.email,
+                p.username, p.about_me, p.pfp,
+                l.highscore
+            FROM users u
+            LEFT JOIN profiles p ON u.id = p.user_id
+            LEFT JOIN leaderboards l ON u.id = l.user_id
+            WHERE p.username LIKE ? OR ? IS NULL
+            LIMIT ? OFFSET ?
         `;
 
-        const params = [];
+        const [users] = await connection.query(userQuery, 
+            [`%${name || ''}%`, name || null, Number(limit), Number(offset)]
+        );
 
-        console.log('Executing SQL Query:', query, params);
+        // For each user, fetch their related data
+        const enrichedUsers = await Promise.all(users.map(async (user) => {
+            const [comments] = await connection.query(
+                'SELECT content, created_at FROM comments WHERE user_id = ?',
+                [user.id]
+            );
 
+            const [faqs] = await connection.query(
+                'SELECT question, answer FROM faqs WHERE user_id = ?',
+                [user.id]
+            );
 
-        // Add a name filter if provided
-        if (name) {
-            query += ' WHERE profiles.username LIKE ?';
-            params.push(`%${name}%`);
-        }
+            const [news] = await connection.query(
+                'SELECT title, content FROM news WHERE user_id = ?',
+                [user.id]
+            );
 
-        // Add LIMIT and OFFSET
-        query += ' LIMIT ? OFFSET ?';
-        params.push(Number(limit), Number(offset));
+            const [profileComments] = await connection.query(
+                'SELECT content FROM profile_comments WHERE user_id = ?',
+                [user.id]
+            );
 
-        // Execute the query
-        const [results] = await connection.query(query, params);
+            const [achievements] = await connection.query(`
+                SELECT a.name
+                FROM achievements a
+                JOIN achievement_user au ON a.id = au.achievement_id
+                WHERE au.user_id = ?
+            `, [user.id]);
 
-        // Group achievements by profile
-        const response = {};
-        results.forEach(row => {
-            if (!response[row.user_id]) {
-                response[row.user_id] = {
-                    user: {
-                        id: row.user_id,
-                        email: row.user_email,
-                    },
-                    profile: {
-                        username: row.username,
-                        about_me: row.about_me,
-                        pfp: row.pfp,
-                    },
-                    leaderboard: {
-                        highscore: row.highscore,
-                    },
-                    comments: [],
-                    faqs: [],
-                    news: [],
-                    profile_comments: [],
-                    achievements: [],
-                };
-            }
+            return {
+                user: {
+                    id: user.id,
+                    email: user.email
+                },
+                profile: {
+                    username: user.username,
+                    about_me: user.about_me,
+                    pfp: user.pfp
+                },
+                leaderboard: {
+                    highscore: user.highscore
+                },
+                comments,
+                faqs,
+                news,
+                profile_comments: profileComments,
+                achievements: achievements.map(a => a.name)
+            };
+        }));
 
-            const userResponse = response[row.user_id];
-
-            // Add comment (ensure no duplicates)
-            if (row.comment_content && !userResponse.comments.some(c => 
-                c.content.trim().toLowerCase() === row.comment_content.trim().toLowerCase() &&
-                new Date(c.created_at).getTime() === new Date(row.comment_created_at).getTime()
-            )) {
-                userResponse.comments.push({
-                    content: row.comment_content.trim(),
-                    created_at: new Date(row.comment_created_at).toISOString(),
-                });
-            }
-
-            // Add FAQ (ensure no duplicates)
-            if (row.faq_question && !userResponse.faqs.some(f => f.question === row.faq_question && f.answer === row.faq_answer)) {
-                userResponse.faqs.push({
-                    question: row.faq_question,
-                    answer: row.faq_answer,
-                });
-            }
-
-            // Add News (ensure no duplicates)
-            if (row.news_title && !userResponse.news.some(n => n.title === row.news_title && n.content === row.news_content)) {
-                userResponse.news.push({
-                    title: row.news_title,
-                    content: row.news_content,
-                });
-            }
-
-            // Add Profile Comment (ensure no duplicates)
-            if (row.profile_comment_content && !userResponse.profile_comments.some(pc => pc.content === row.profile_comment_content)) {
-                userResponse.profile_comments.push({
-                    content: row.profile_comment_content,
-                });
-            }
-
-            // Add Achievement (ensure no duplicates)
-            if (row.achievement_name && !userResponse.achievements.includes(row.achievement_name)) {
-                userResponse.achievements.push(row.achievement_name);
-            }
-        });
-        console.log('Query Results:', results);
-        res.status(200).json({
-            data: Object.values(response),
-        });
+        res.status(200).json({ data: enrichedUsers });
 
     } catch (err) {
         console.error('Error fetching user details:', err);
-        res.status(500).json({ message: 'Error fetching user details' });
+        res.status(500).json({ 
+            message: 'Error fetching user details',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+        });
     }
 });
-
 router.get('/filter/userAndProfilesBasedOnHighscore', async (req, res) => {
     try {
         // Assuming you're using a raw SQL query with a database library
